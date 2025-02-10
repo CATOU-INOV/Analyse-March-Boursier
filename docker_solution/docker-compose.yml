@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  nifi:
+    image: apache/nifi:1.27.0
+    container_name: nifis
+    ports:
+      - "8443:8443"  # NiFi web interface with HTTPS
+    environment:
+      - NIFI_WEB_HTTPS_PORT=8443
+      - SINGLE_USER_CREDENTIALS_USERNAME=admin
+      - SINGLE_USER_CREDENTIALS_PASSWORD=ctsB0tRBKHRAx69EqUghvvgEvjnaLjFEB
+    networks:
+      - nifi-network
+
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadbs
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: Meteo
+      MYSQL_USER: nifi_user
+      MYSQL_PASSWORD: nifi_password
+    ports:
+      - "3306:3306" # MariaDB default port
+    networks:
+      - nifi-network
+    restart: always
+networks:
+  nifi-network:
+    driver: bridge
+
