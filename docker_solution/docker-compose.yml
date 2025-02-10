@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   nifi:
-    image: apache/nifi:1.27.0
+    build:
+      context: .  # Utilise le Dockerfile dans le dossier courant
+      dockerfile: Dockerfile-nifi
     container_name: nifis
     ports:
       - "8443:8443"  # NiFi web interface with HTTPS
@@ -12,6 +14,7 @@ services:
       - SINGLE_USER_CREDENTIALS_PASSWORD=ctsB0tRBKHRAx69EqUghvvgEvjnaLjFEB
     networks:
       - nifi-network
+    command: ["nifi.sh", "start"]  # Ajoute la commande explicite pour démarrer NiFi
 
   mariadb:
     image: mariadb:latest
@@ -22,10 +25,11 @@ services:
       MYSQL_USER: nifi_user
       MYSQL_PASSWORD: nifi_password
     ports:
-      - "3306:3306" # MariaDB default port
+      - "3306:3306"  # MariaDB default port
     networks:
       - nifi-network
     restart: always
+
 networks:
   nifi-network:
     driver: bridge
