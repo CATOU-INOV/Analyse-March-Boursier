@@ -1,16 +1,15 @@
+import sys
 import yfinance as yf
 import json
- 
+
 def get_stock_data(tickers):
     data = {}
     for ticker in tickers:
         stock = yf.Ticker(ticker)
         hist = stock.history(period="1d")
         hist.reset_index(inplace=True)
- 
         info = stock.info
         company_name = info.get("longName", ticker)
- 
         if not hist.empty:
             date_value = hist["Date"].iloc[0].date()
             open_price = float(hist["Open"].iloc[0])
@@ -20,7 +19,6 @@ def get_stock_data(tickers):
             volume = int(hist["Volume"].iloc[0])
             dividends = float(hist["Dividends"].iloc[0]) if "Dividends" in hist.columns else 0.0
             stock_splits = float(hist["Stock Splits"].iloc[0]) if "Stock Splits" in hist.columns else 0.0
- 
             data[ticker] = {
                 "ticker": ticker,
                 "company_name": company_name,
@@ -36,15 +34,11 @@ def get_stock_data(tickers):
         else:
             data[ticker] = "No data available"
     return data
- 
-def save_to_json(data, filename="stock_data.json"):
-    with open(filename, "w") as f:
-        json.dump(data, f, indent=4)
- 
-if __name__ == "__main__":
-    tickers = ["AAPL", "GOOGL", "TSLA"]
-    stock_data = get_stock_data(tickers)
-    save_to_json(stock_data)
-    print("Données enregistrées dans stock_data.json")
- 
- 
+
+
+tickers = ["AAPL", "GOOGL", "TSLA"]
+try:
+      stock_data = get_stock_data(tickers)
+      print(json.dumps(stock_data)) 
+except SystemExit:
+    pass  
