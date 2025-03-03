@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   nifi:
     build:
@@ -12,11 +10,12 @@ services:
       - NIFI_WEB_HTTPS_PORT=8443
       - SINGLE_USER_CREDENTIALS_USERNAME=admin
       - SINGLE_USER_CREDENTIALS_PASSWORD=ctsB0tRBKHRAx69EqUghvvgEvjnaLjFEB
-    command: ["nifi.sh", "start"]
     volumes:
       - ./scripts:/data  # Volume pour monter ton répertoire local (remplace par ton chemin local)
     networks:
       - nifi-network
+    command: ["nifi.sh", "start"]
+
 
   mariadb:
     image: mariadb:latest

@@ -3,7 +3,7 @@ import yfinance as yf
 import json
 
 def get_stock_data(tickers):
-    data = {}
+    data = []
     for ticker in tickers:
         stock = yf.Ticker(ticker)
         hist = stock.history(period="1d")
@@ -19,10 +19,10 @@ def get_stock_data(tickers):
             volume = int(hist["Volume"].iloc[0])
             dividends = float(hist["Dividends"].iloc[0]) if "Dividends" in hist.columns else 0.0
             stock_splits = float(hist["Stock Splits"].iloc[0]) if "Stock Splits" in hist.columns else 0.0
-            data[ticker] = {
+            data.append({
                 "ticker": ticker,
                 "company_name": company_name,
-                "date": str(date_value),  
+                "date": str(date_value),
                 "open_price": open_price,
                 "close_price": close_price,
                 "high_price": high_price,
@@ -30,15 +30,26 @@ def get_stock_data(tickers):
                 "volume": volume,
                 "dividends": dividends,
                 "stock_splits": stock_splits
-            }
+            })
         else:
-            data[ticker] = "No data available"
+            data.append({
+                "ticker": ticker,
+                "company_name": "No data available",
+                "date": "",
+                "open_price": 0.0,
+                "close_price": 0.0,
+                "high_price": 0.0,
+                "low_price": 0.0,
+                "volume": 0,
+                "dividends": 0.0,
+                "stock_splits": 0.0
+            })
     return data
 
 
 tickers = ["AAPL", "GOOGL", "TSLA"]
 try:
-      stock_data = get_stock_data(tickers)
-      print(json.dumps(stock_data)) 
+    stock_data = get_stock_data(tickers)
+    print(json.dumps(stock_data, indent=4))
 except SystemExit:
-    pass  
+    pass
