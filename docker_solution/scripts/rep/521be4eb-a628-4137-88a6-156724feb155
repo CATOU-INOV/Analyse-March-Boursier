@@ -1,0 +1,41 @@
+- AAPL: No data found for this date range, symbol may be delisted
+- GOOGL: No data found for this date range, symbol may be delisted
+- TSLA: No data found for this date range, symbol may be delisted
+[
+    {
+        "ticker": "AAPL",
+        "company_name": "No data available",
+        "date": "",
+        "open_price": 0.0,
+        "close_price": 0.0,
+        "high_price": 0.0,
+        "low_price": 0.0,
+        "volume": 0,
+        "dividends": 0.0,
+        "stock_splits": 0.0
+    },
+    {
+        "ticker": "GOOGL",
+        "company_name": "No data available",
+        "date": "",
+        "open_price": 0.0,
+        "close_price": 0.0,
+        "high_price": 0.0,
+        "low_price": 0.0,
+        "volume": 0,
+        "dividends": 0.0,
+        "stock_splits": 0.0
+    },
+    {
+        "ticker": "TSLA",
+        "company_name": "No data available",
+        "date": "",
+        "open_price": 0.0,
+        "close_price": 0.0,
+        "high_price": 0.0,
+        "low_price": 0.0,
+        "volume": 0,
+        "dividends": 0.0,
+        "stock_splits": 0.0
+    }
+]
