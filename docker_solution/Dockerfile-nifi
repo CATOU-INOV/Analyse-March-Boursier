@@ -3,11 +3,13 @@ FROM apache/nifi:1.27.0
 # Passer en mode root pour installer les paquets
 USER root
 
-# Mettre à jour les paquets et installer Python3 + pip
+# Mettre à jour les paquets et installer Python 3.10.12 + pip
 RUN apt-get update && \
-    apt-get install -y python3 python3-pip && \
+    apt-get install -y python3.10 python3.10-distutils python3.10-venv python3-pip && \
     apt-get clean
+
+# Installer les versions compatibles de Pandas, NumPy et yfinance
+RUN pip3.10 install --no-cache-dir yfinance==0.2.54 numpy==2.2.2 pandas==2.2.3
 
 # Revenir à l'utilisateur NiFi
 USER nifi
-
