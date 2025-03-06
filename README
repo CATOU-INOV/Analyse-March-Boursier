@@ -1,1 +1,126 @@
+Analyse du Marché Boursier avec ETL, PySpark et LLM
 
+1. Contexte et Objectif
+
+Ce projet a été développé comme une solution complète pour l'analyse du marché boursier. L'objectif principal est de récupérer, stocker et analyser des données financières en temps réel, puis d'utiliser un modèle de langage (LLM) pour répondre à des questions spécifiques et générer des visualisations pertinentes.
+
+Par exemple, l'une des questions traitées est :
+
+"Quelle est la tendance de Tesla au cours des six derniers mois ?"
+Le système est conçu pour être extensible et peut facilement intégrer d'autres entreprises dans l'analyse.
+
+
+2. Architecture et Flux de Données
+
+a. Récupération et Injection des Données
+Apache NiFi est utilisé comme solution ETL (Extract, Transform, Load) pour le streaming de données.
+NiFi récupère les données financières via du scraping de l'API yfinance.
+Les données sont transformées (JSON --> SQL ) et injectées dans une base de données MariaDB.
+Ce processus permet de capter des flux continus de données financières structurées.
+
+
+b. Stockage des Données
+MariaDB est utilisée comme base de données relationnelle pour stocker les données extraites.
+La structure de la table financial_data permet de gérer des informations telles que le ticker, le nom de l'entreprise, la date, les prix d'ouverture, de clôture, les plus hauts, les plus bas, le volume, etc.
+La base est également utilisée pour stocker des mesures calculées (par exemple dans la table financial_measures_by_date).
+
+
+c. Analyse des Données
+PySpark est utilisé pour le calcul de mesures financières sur les séries temporelles :
+Une Pandas UDF (Grouped Map) est appliquée pour calculer, pour chaque entreprise et pour chaque date, des indicateurs tels que la volatilité (écart-type des rendements logarithmiques), la tendance (pente d'une régression linéaire sur les prix de clôture) et le volume moyen.
+Ces mesures sont ensuite stockées dans une table dédiée (financial_measures_by_date) dans MariaDB.
+
+
+d. Exploitation par le LLM
+Un modèle de langage (LLM) récupère les données stockées dans MariaDB pour répondre à des questions spécifiques (par exemple, analyser la tendance d'une entreprise sur une période donnée).
+Le LLM génère ensuite des graphiques illustrant la tendance pour des entreprises sélectionnées (dans notre cas, Tesla, Apple, Google, etc.), facilitant l'interprétation des résultats.
+
+3. Stack Technique
+
+a. Apache NiFi
+Rôle : Orchestration du flux de données en temps réel.
+Fonctionnalités :
+Scraping des données via l'API yfinance.
+Transformation et injection des données dans MariaDB.
+Déploiement : Exécuté dans un conteneur Docker construit à partir du fichier Dockerfile-nifi.
+
+b. MariaDB
+Rôle : Base de données relationnelle pour le stockage des données financières et des mesures analytiques.
+Caractéristiques :
+Stockage des données structurées (en JSON) et des indicateurs calculés.
+Utilisation du moteur InnoDB et du charset utf8mb4 pour une compatibilité maximale.
+Déploiement : Exécuté dans un conteneur Docker avec l'image officielle mariadb:latest.
+
+c. PySpark
+Rôle : Traitement et analyse des données financières.
+Utilisation :
+Connexion à MariaDB via JDBC.
+Calcul de mesures temporelles à l'aide d'une Pandas UDF.
+Dépendances :
+Driver JDBC pour MariaDB (téléchargé et placé dans le dossier /docker_solution/drivers).
+Conversion des types de données pour effectuer des opérations mathématiques sur les colonnes close_price et volume.
+
+d. Modèle de Langage (LLM)
+Rôle : Répondre à des questions analytiques et générer des visualisations.
+Fonctionnalités :
+Interrogation de la base de données pour extraire des mesures spécifiques.
+Création automatique de graphiques illustrant la tendance d'une entreprise (par exemple, "Quelle est la tendance de Tesla ?").
+Extensibilité : L'infrastructure en place permet d'ajouter facilement d'autres questions ou entreprises à analyser.
+
+e. Docker Compose
+Le projet utilise Docker Compose pour orchestrer les services :
+NiFi : Gère l'ETL et le scraping.
+MariaDB : Stocke les données brutes et les mesures calculées.
+
+4. Création des Tables dans MariaDB
+
+a. Table financial_data
+La table financial_data contient les données brutes récupérées via NiFi. Un exemple de structure (obtenue via la commande DESCRIBE) est le suivant :
++--------------+---------------+------+-----+---------+-------+
+| Field        | Type          | Null | Key | Default | Extra |
++--------------+---------------+------+-----+---------+-------+
+| ticker       | varchar(10)   | NO   |     | NULL    |       |
+| company_name | varchar(255)  | NO   | PRI | NULL    |       |
+| date         | date          | NO   | PRI | NULL    |       |
+| open_price   | decimal(10,4) | NO   |     | NULL    |       |
+| close_price  | decimal(10,4) | NO   |     | NULL    |       |
+| high_price   | decimal(10,4) | NO   |     | NULL    |       |
+| low_price    | decimal(10,4) | NO   |     | NULL    |       |
+| volume       | bigint(20)    | NO   |     | NULL    |       |
+| dividends    | decimal(10,4) | NO   |     | 0.0000  |       |
+| stock_splits | decimal(10,4) | NO   |     | 0.0000  |       |
++--------------+---------------+------+-----+---------+-------+
+
+b. Table financial_measures_by_date
+La table qui stocke les mesures calculées (volatilité, tendance, volume moyen) par entreprise et par date est créée avec le script suivant :
+CREATE TABLE financial_measures_by_date (
+    company_name VARCHAR(255) NOT NULL,
+    date DATE NOT NULL,
+    volatility DOUBLE,
+    trend DOUBLE,
+    average_volume DOUBLE,
+    PRIMARY KEY (company_name, date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+5. Exécution du Processus
+
+Démarrage des Services
+Utilisez Docker Compose pour démarrer NiFi et MariaDB :
+docker-compose up --build
+Flux de Données
+NiFi récupère les données via yfinance et les injecte dans la table financial_data de MariaDB.
+Un job PySpark (développé en Python) se connecte à MariaDB, lit les données et calcule les mesures pour chaque entreprise et chaque date via une Pandas UDF.
+Le résultat est stocké dans la table financial_measures_by_date.
+Exploitation via LLM
+Un modèle de langage interroge la base pour répondre à des questions (par exemple, "Quelle est la tendance de Tesla au cours des six derniers mois ?") et génère des graphiques pour illustrer les tendances.
+
+
+6. Conclusion
+
+Ce projet combine plusieurs technologies modernes (Apache NiFi, PySpark, MariaDB, LLM et Docker) pour créer une solution intégrée d'analyse du marché boursier. Il permet :
+
+La collecte et l'injection de données financières en temps réel.
+Le calcul d'indicateurs analytiques dynamiques par entreprise et par date.
+L'exploitation des données via un LLM pour fournir des réponses et visualisations interactives.
+Cette solution modulaire et scalable peut facilement être étendue pour inclure d'autres sources de données ou pour répondre à de nouvelles questions analytiques.
