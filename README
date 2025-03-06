@@ -102,8 +102,19 @@ CREATE TABLE financial_measures_by_date (
     PRIMARY KEY (company_name, date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+5. Configuration de l'Environnement de Développement
 
-5. Exécution du Processus
+Pour exécuter ce projet, il est recommandé d'utiliser un environnement virtuel (venv) avec Python 3.11. Le dossier de l'environnement virtuel est exclu du dépôt (voir le fichier .gitignore), vous devez donc le créer et y installer les dépendances avant de démarrer le projet.
+
+Prérequis
+Python : Assurez-vous d'avoir Python 3.11 installé sur votre machine.
+Gestionnaire de dépendances : Nous utilisons pip pour installer les packages.
+Installation de l'Environnement Virtuel
+Création de l'environnement virtuel
+Dans le répertoire racine du projet, exécutez :
+
+
+6. Exécution du Processus
 
 Démarrage des Services
 Utilisez Docker Compose pour démarrer NiFi et MariaDB :
@@ -115,8 +126,27 @@ Le résultat est stocké dans la table financial_measures_by_date.
 Exploitation via LLM
 Un modèle de langage interroge la base pour répondre à des questions (par exemple, "Quelle est la tendance de Tesla au cours des six derniers mois ?") et génère des graphiques pour illustrer les tendances.
 
+python3.11 -m venv venv
 
-6. Conclusion
+Activation de l'environnement virtuel
+Sous macOS/Linux :
+source venv/bin/activate
+Sous Windows (CMD) :
+venv\Scripts\activate.bat
+Sous Windows (PowerShell) :
+venv\Scripts\Activate.ps1
+
+
+Installation des dépendances
+Pour générer la liste complète des packages installés dans votre venv et la partager, exécutez :
+pip freeze > requirements.txt
+Puis installez-les dans un nouvel environnement via :
+
+pip install -r requirements.txt
+
+
+
+7. Conclusion
 
 Ce projet combine plusieurs technologies modernes (Apache NiFi, PySpark, MariaDB, LLM et Docker) pour créer une solution intégrée d'analyse du marché boursier. Il permet :
 
