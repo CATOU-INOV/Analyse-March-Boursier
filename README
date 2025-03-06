@@ -32,8 +32,15 @@ Ces mesures sont ensuite stockées dans une table dédiée (financial_measures_b
 
 
 d. Exploitation par le LLM
-Un modèle de langage (LLM) récupère les données stockées dans MariaDB pour répondre à des questions spécifiques (par exemple, analyser la tendance d'une entreprise sur une période donnée).
-Le LLM génère ensuite des graphiques illustrant la tendance pour des entreprises sélectionnées (dans notre cas, Tesla, Apple, Google, etc.), facilitant l'interprétation des résultats.
+Un modèle de langage (LLM) permet de récupèrer les données stockées dans MariaDB afin de répondre précisément à des questions formulées par les utilisateurs.
+Pour cette tâche, nous utilisons le modèle CamemBERT développé par Google, spécialement conçu pour comprendre la langue française.
+CamemBERT permet d'identifier clairement l'intention derrière les questions posées, d'extraire efficacement les noms des entreprises mentionnées, et de traduire ces questions en requêtes SQL exploitables directement sur la base de données.
+Elle permet aussi d'analyser une question posée sur l'actualité et chercher des articles de presse en lien avec la question via des flux RSS.
+
+e. Interface Utilisateur
+L'interface utilisateur permet d'afficher des graphiques dynamiques générés à partir des données boursières des entreprises identifiées par le LLM. 
+De plus, l'interface propose d'afficher automatiquement des articles de presse pertinents en lien avec les questions posées, offrant ainsi un contexte supplémentaire et enrichissant l'expérience utilisateur.
+
 
 3. Stack Technique
 
@@ -60,17 +67,25 @@ Dépendances :
 Driver JDBC pour MariaDB (téléchargé et placé dans le dossier /docker_solution/drivers).
 Conversion des types de données pour effectuer des opérations mathématiques sur les colonnes close_price et volume.
 
-d. Modèle de Langage (LLM)
-Rôle : Répondre à des questions analytiques et générer des visualisations.
+d. Modèle de Langage CamemBERT (LLM)
+Rôle : Analyser des questions analytiques.
 Fonctionnalités :
-Interrogation de la base de données pour extraire des mesures spécifiques.
-Création automatique de graphiques illustrant la tendance d'une entreprise (par exemple, "Quelle est la tendance de Tesla ?").
+Traduction des questions en requête SQL facilitant l'interrogation de la base de données pour extraire des mesures spécifiques.
+Analyse des questions d'actualité pour chercher des articles de presse pertinents.
 Extensibilité : L'infrastructure en place permet d'ajouter facilement d'autres questions ou entreprises à analyser.
 
 e. Docker Compose
 Le projet utilise Docker Compose pour orchestrer les services :
 NiFi : Gère l'ETL et le scraping.
 MariaDB : Stocke les données brutes et les mesures calculées.
+
+f. Tkinter 
+Rôle : Afficher l'interface utilisateur.
+Caractéristiques :
+Une page dédiée à la visualisation des données boursière.
+Une deuxième dédiée à l'affichage des articles de presse.
+Déploiement : L'interface se lance automatiquement dès l'exécution du code. 
+
 
 4. Création des Tables dans MariaDB
 
@@ -124,7 +139,7 @@ NiFi récupère les données via yfinance et les injecte dans la table financial
 Un job PySpark (développé en Python) se connecte à MariaDB, lit les données et calcule les mesures pour chaque entreprise et chaque date via une Pandas UDF.
 Le résultat est stocké dans la table financial_measures_by_date.
 Exploitation via LLM
-Un modèle de langage interroge la base pour répondre à des questions (par exemple, "Quelle est la tendance de Tesla au cours des six derniers mois ?") et génère des graphiques pour illustrer les tendances.
+Un modèle de langage interroge la base pour répondre à des questions (par exemple, "Quelle est la tendance de Tesla au cours des six derniers mois ?") et l'interface va générer des graphiques pour illustrer les tendances.
 
 python3.11 -m venv venv
 
